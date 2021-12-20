@@ -1,0 +1,284 @@
+type: edu
+custom_name: stage4
+files:
+- name: creditcalc/creditcalc.py
+  visible: true
+  text: "import math\n\nprint('''What do you want to calculate?\ntype \"n\" for number\
+    \ of monthly payments,\ntype \"a\" for annuity monthly payment amount,\ntype \"\
+    p\" for loan principal:''')\n\ndef otvet():\n\twhile True:\n\t\to = input()\n\t\
+    \tif o == 'a' or o == 'p' or o == 'n':\n\t\t\treturn o \n\t\t\t\ndef number_of_monthly():\n\
+    \tprint('Enter the loan principal:')\n\tloan = int(input())\n\tprint('Enter the\
+    \ monthly payment:')\n\tmonthly_payment = int(input())\n\tprint('Enter the loan\
+    \ interest:')\n\tinterest = float(input())\n\ti = interest / (12 * 100)\n\tif\
+    \ interest == 0:\n\t\tn = loan / monthly_payment\n\telse:\n\t\tn = math.log((monthly_payment\
+    \ / (monthly_payment - i * loan)), (1 + i))\n\treturn n\n\t\ndef annuity_payment():\n\
+    \tprint('Enter the loan principal:')\n\tloan = int(input())\n\tprint('Enter the\
+    \ number of periods:')\n\tmonth = int(input())\n\tprint('Enter the loan interest:')\n\
+    \tinterest = float(input())\n\ti = interest / (12 * 100)\n\tif interest == 0:\n\
+    \t\tn = loan / month\n\telse:\n\t\tn = loan * ((i * (1 + i) ** month) / ((1 +\
+    \ i) ** month - 1))\n\treturn n\n\ndef loan_principal():\n\tprint('Enter the annuity\
+    \ payment:')\n\ta = float(input())\n\tprint('Enter the number of periods:')\n\t\
+    month = int(input())\n\tprint('Enter the loan interest:')\n\tinterest = float(input())\n\
+    \ti = interest / (12 * 100)\n\tif interest == 0:\n\t\tn = a * month\n\telse:\n\
+    \t\tn = a  / ((i * (1 + i) ** month) / ((1 + i) ** month - 1))\n\treturn n\t\n\
+    \t\n\t\n\nansower = otvet()\n\nif ansower == 'n':\n\tres = math.ceil(number_of_monthly())\n\
+    \ty = res // 12\n\tm = res % 12\n\tif m == 0 and y == 1:\n\t\tprint('1 year')\n\
+    \telif y == 0 and m == 1:\n\t\tprint('1 month')\n\telif y > 1 and m == 0:\n\t\t\
+    print(f'{y} years')\n\telif y == 0 and m > 1:\n\t\tprint(f'{m} months')\n\telif\
+    \ y == 1 and m > 1:\n\t\tprint(f'{y} year and {m} months')\n\telif y > 1 and m\
+    \ == 1:\n\t\tprint(f'{y} years and {m} month')\n\telse:\n\t\tprint(f'{y} years\
+    \ and {m} months')\n\t\nelif ansower == 'a':\n\tres = math.ceil(annuity_payment())\n\
+    \tprint(f'Your monthly payment = {res}!')\nelif ansower == 'p':\n\tres = round(loan_principal())\n\
+    \tprint(f'Your loan principal = {res}!')\n\n\t\t\n\n"
+  learner_created: false
+- name: tests.py
+  visible: false
+  text: |
+    from hstest.stage_test import StageTest
+    from hstest.test_case import TestCase
+    from hstest.check_result import CheckResult
+    import re
+
+    CheckResult.correct = lambda: CheckResult(True, '')
+    CheckResult.wrong = lambda feedback: CheckResult(False, feedback)
+
+
+    class LoanCalcTest(StageTest):
+        def generate(self):
+            return [
+                TestCase(
+                    args=[
+                        '--type=annuity',
+                        '--payment=8722',
+                        '--periods=120',
+                        '--interest=5.6',
+                    ],
+                    attach=('principal', 800018, 246622),
+                ),
+                TestCase(
+                    args=[
+                        '--type=annuity',
+                        '--payment=6898',
+                        '--periods=240',
+                        '--interest=3.4',
+                    ],
+                    attach=('principal', 1199997, 455523),
+                ),
+
+                TestCase(
+                    args=[
+                        '--type=annuity',
+                        '--principal=1000000',
+                        '--periods=8',
+                        '--interest=9.8',
+                    ],
+                    attach=('payment', 129638, 37104),
+                ),
+
+                TestCase(
+                    args=[
+                        '--type=annuity',
+                        '--principal=1000000',
+                        '--periods=60',
+                        '--interest=10',
+                    ],
+                    attach=('payment', 274880, 21248),
+                ),
+
+                TestCase(
+                    args=[
+                        '--type=annuity',
+                        '--principal=500000',
+                        '--payment=23000',
+                        '--interest=7.8',
+                    ],
+                    attach=('periods', 52000, 24),
+                ),
+
+                TestCase(
+                    args=[
+                        '--type=diff',
+                        '--principal=1000000',
+                        '--periods=10',
+                        '--interest=10',
+                    ],
+                    attach=[
+                        108334,
+                        107500,
+                        106667,
+                        105834,
+                        105000,
+                        104167,
+                        103334,
+                        102500,
+                        101667,
+                        100834,
+                        45837,
+                    ],
+                ),
+
+                TestCase(
+                    args=[
+                        '--type=diff',
+                        '--principal=500000',
+                        '--periods=8',
+                        '--interest=7.8',
+                    ],
+                    attach=[
+                        65750,
+                        65344,
+                        64938,
+                        64532,
+                        64125,
+                        63719,
+                        63313,
+                        62907,
+                        14628,
+                    ],
+                ),
+
+                TestCase(
+                    args=[
+                        '--type=annuity',
+                        '--principal=1000000',
+                        '--payment=104000',
+                    ],
+                    attach='Incorrect',
+                ),
+
+                TestCase(
+                    args=[
+                        '--type=diff',
+                        '--principal=-1000000',
+                        '--payment=104000',
+                        '--periods=8',
+                    ],
+                    attach='Incorrect',
+                ),
+
+            ]
+
+        def check(self, reply, attach):
+            if attach == 'Incorrect':
+                if attach.lower() in reply.lower():
+                    return CheckResult.correct()
+
+                return CheckResult.wrong(
+                    'Parameters are incorrect. '
+                    'Just output "Incorrect parameters"'
+                )
+
+            numbers = re.findall(r'[-+]?(\d*\.\d+|\d+)', reply)
+            if len(numbers) == 0:
+                return CheckResult.wrong(
+                    'No numbers in the answer',
+                )
+
+            if isinstance(attach, tuple):
+                if attach[0] == 'periods':
+                    years = int(attach[2] / 12)
+                    months = str(int(attach[2] % 12))
+                    for i in numbers:
+                        if abs(attach[1] - float(i)) < 2:
+                            if str(months) in numbers or str(years) in numbers:
+                                return CheckResult.correct()
+
+                    if years == 0:
+                        output = (
+                            'Looks like your periods '
+                            'calculations aren\'t working properly. '
+                            'Correct months and overpayment are '
+                            '[ {0}, {1} ]'
+                            ', but you output: {2}'
+                        )
+                        return CheckResult.wrong(
+                            output.format(attach[2], attach[1], numbers),
+                        )
+                    else:
+                        if months != '0':
+                            output = (
+                                'Looks like your periods '
+                                'calculations aren\'t working properly. '
+                                'Correct years, months and overpayment are '
+                                '[ {0}, {1}, {2} ]'
+                                ', but you output: {3}'
+                            )
+                            return CheckResult.wrong(
+                                output.format(years, months, attach[1], numbers),
+                            )
+                        else:
+                            output = (
+                                'Looks like your periods '
+                                'calculations aren\'t working properly. '
+                                'Correct years and overpayment are '
+                                '[ {0}, {1} ]'
+                                ', but you output: {2}'
+                            )
+                            return CheckResult.wrong(
+                                output.format(years, attach[1], numbers),
+                            )
+                for i in numbers:
+                    if not abs(attach[1] - float(i)) < 2:
+                        if not abs(attach[2] - float(i)) < 2:
+                            if attach[0] == 'payment':
+                                output = (
+                                    'Looks like your annuity payments '
+                                    'calculations aren\'t working properly. '
+                                    'Correct annuity payment and overpayment are '
+                                    '[ {0}, {1} ]'
+                                    ', but you output: {2}'
+                                )
+                            else:
+                                output = (
+                                    'Looks like your loan principal '
+                                    'calculations aren\'t working properly. '
+                                    'Correct loan principal and overpayment are '
+                                    '[ {0}, {1} ]'
+                                    ', but you output: {2}'
+                                )
+                            return CheckResult.wrong(
+                                output.format(attach[2], attach[1], numbers),
+                            )
+
+                return CheckResult.correct()
+
+            if isinstance(attach, list):
+                if (len(numbers) + 1) / 2 < len(attach):
+                    user_numbers = numbers[1::2]
+                    if numbers[-1] not in user_numbers:
+                        user_numbers.append(numbers[-1])
+                    return CheckResult.wrong(
+                        'Not enough values for diff payment in the answer '
+                        'must be {0} with overpayment {1}, but you output: {2}'
+                        .format(attach[:-1], attach[-1], user_numbers)
+                    )
+
+                for figure in attach:
+                    flag = False
+                    for number in numbers:
+                        if abs(float(number) - figure) < 2:
+                            flag = True
+                            break
+                    if flag is False:
+                        user_numbers = numbers[1::2]
+                        if numbers[-1] not in user_numbers:
+                            user_numbers.append(numbers[-1])
+                        return CheckResult.wrong(
+                            'Incorrect result '
+                            'must be {0} with overpayment {1}, but you output: {2}'
+                            .format(attach[:-1], attach[-1], user_numbers)
+                        )
+
+            return CheckResult.correct()
+
+
+    if __name__ == '__main__':
+        LoanCalcTest('creditcalc.creditcalc').run_tests()
+  learner_created: false
+feedback_link: https://hyperskill.org/projects/90/stages/503/implement#comment
+status: Solved
+feedback:
+  message: Well done! You've finished the project. Select a new project on <a href="https://hyperskill.org/projects">JetBrains
+    Academy</a> to continue learning.
+  time: Mon, 20 Dec 2021 19:07:01 UTC
+record: 3
